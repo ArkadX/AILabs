@@ -273,7 +273,6 @@ double** process(string* items, int amount) { //this function code depends on th
                 }
             }
             if (invalid) {
-                cout << "invalid" << endl;
                 sample[j][1] = -1;
             }
         }
