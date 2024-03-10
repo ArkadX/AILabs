@@ -81,8 +81,9 @@ public:
                     }
                 }
                 for (int k = 0; k < layers[i].neurons[j].number_of_neuron_inputs; k++) { //selecting random starting weights from -0.5 to 0.5
-                    double r = rand();
-                    layers[i].neurons[j].inputs[k].weight = r / RAND_MAX - 0.5;
+                    //double r = rand();
+                    //layers[i].neurons[j].inputs[k].weight = r / RAND_MAX - 0.5;
+                    layers[i].neurons[j].inputs[k].weight = 0.5;
                 }
             }
         }
@@ -91,7 +92,7 @@ public:
     ~Perceptron() {
     }
 
-    static Perceptron makeAPerceptron() {
+    static Perceptron make_a_perceptron() {
         int layers;
         cout << "Enter the number of neuron layers in the perceptron:";
         cin >> layers;
@@ -139,6 +140,7 @@ public:
                 for (int k = 0; k < this->layers[j].number_of_neurons; k++) {
                     for (int l = 0; l < this->layers[j].neurons[k].number_of_neuron_inputs; l++) {
                         this->layers[j].neurons[k].inputs[l].weight += SPEED_OF_TRAIN * this->layers[j].neurons[k].residual * *(double*)this->layers[j].neurons[k].inputs[l].p_value;
+                        //cout << "Weight: " << this->layers[j].neurons[k].inputs[l].weight << endl;
                     }
                 }
             }
@@ -157,6 +159,55 @@ ifstream openfile(string name) {
         exit(-1);
     }
     return file;
+}
+
+void normalize(double*** sample, int amount) {
+    for (int i = 0; i < NUMBER_OF_INPUTS + 1; i++) {
+        double max = 0;
+        for (int j = 0; j < amount; j++) {
+            try {
+                if ((*sample)[j][i] >= max) {
+                    max = (*sample)[j][i];
+                }
+            }
+            catch (invalid_argument) {
+                continue;
+            }
+        }
+        for (int j = 0; j < amount; j++) {
+            (*sample)[j][i] = (*sample)[j][i] / max;
+        }
+    }
+}
+
+void remove_contradictions_and_repetitions(double*** sample, int amount) {
+    for (int i = 0; i < amount - 1; i++) {
+        for (int j = i + 1; j < amount; j++) {
+            bool invalid = 1;
+            for (int k = 1; k < NUMBER_OF_INPUTS + 1; k++) {
+                if ((*sample)[i][k] != (*sample)[j][k]) {
+                    invalid = 0;
+                    break;
+                }
+            }
+            if (invalid) {
+                (*sample)[j][1] = -1;
+            }
+        }
+    }
+}
+
+void length_set_to_1(double*** sample, int amount) {
+    for (int i = 0; i < amount; i++) {
+        double length = 0;
+        for (int j = 1; j < NUMBER_OF_INPUTS + 1; j++) {
+            length += pow((*sample)[i][j], 2);
+        }
+        length = sqrt(length);
+        for (int j = 1; j < NUMBER_OF_INPUTS + 1; j++) {
+            (*sample)[i][j] /= length;
+        }
+    }
 }
 
 double** process(string* items, int amount) { //this function code depends on the sample view
@@ -245,39 +296,9 @@ double** process(string* items, int amount) { //this function code depends on th
             continue;
         }
     }
-    
-    for (int i = 0; i < NUMBER_OF_INPUTS + 1; i++) {
-        double max = 0;
-        for (int j = 0; j < amount; j++) {
-            try {
-                if (sample[j][i] >= max) {
-                    max = sample[j][i];
-                }
-            }
-            catch (invalid_argument) {
-                continue;
-            }
-        }
-        for (int j = 0; j < amount; j++) {
-            sample[j][i] = sample[j][i] / max;
-        }
-    }
-
-    for (int i = 0; i < amount - 1; i++) {
-        for (int j = i + 1; j < amount; j++) {
-            bool invalid = 1;
-            for (int k = 1; k < NUMBER_OF_INPUTS + 1; k++) {
-                if (sample[i][k] != sample[j][k]) {
-                    invalid = 0;
-                    break;
-                }
-            }
-            if (invalid) {
-                sample[j][1] = -1;
-            }
-        }
-    }
-
+    normalize(&sample, amount);
+    remove_contradictions_and_repetitions(&sample, amount);
+    length_set_to_1(&sample, amount);
     for (int i = 0; i < amount; i++) {
         for (int j = 0; j < NUMBER_OF_INPUTS + 1; j++) {
             cout << sample[i][j] << " ";
@@ -318,7 +339,7 @@ void get_the_samples(double*** training_sample, double*** testing_sample) {
 int main()
 {
     srand(time(NULL));
-    Perceptron perceptron = Perceptron::makeAPerceptron();
+    Perceptron perceptron = Perceptron::make_a_perceptron();
 
     double** training_sample = new double*[TRAINING_SAMPLE_ITEMS];
     for (int i = 0; i < TRAINING_SAMPLE_ITEMS; i++) {
