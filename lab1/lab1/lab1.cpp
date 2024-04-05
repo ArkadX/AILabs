@@ -424,17 +424,16 @@ int main()
     srand(time(NULL));
     Perceptron perceptron = Perceptron::make_a_perceptron();
 
-    cout << *perceptron.layers[0].neurons[0].inputs[0].p_value << endl; //FICTITIOUS_UNIT = 1 ok
-
-    Sample training_sample(TRAINING_SAMPLE_ITEMS);
-    Sample testing_sample(TESTING_SAMPLE_ITEMS);
-
+    cout << *perceptron.layers[0].neurons[0].inputs[0].p_value << endl; //FICTITIOUS_UNIT = 1 
     cout << *perceptron.layers[0].neurons[0].inputs[0].p_value << endl; //FICTITIOUS_UNIT = 6.95137e-310 ???
     cout << perceptron.FICTITIOUS_UNIT << endl; //1
 
-    get_the_samples(&training_sample, &testing_sample);
+    //Sample training_sample(TRAINING_SAMPLE_ITEMS);
+    //Sample testing_sample(TESTING_SAMPLE_ITEMS);
+
+    //get_the_samples(&training_sample, &testing_sample);
     //training_sample.output();
-    testing_sample.output();
-    perceptron.train(training_sample);
-    perceptron.test(testing_sample);
+    //testing_sample.output();
+    //perceptron.train(training_sample);
+    //perceptron.test(testing_sample);
 }
